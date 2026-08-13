@@ -28,3 +28,47 @@ The fragmented architecture creates several challenges:
 * Limited scalability when onboarding additional datasets
 
 The objective of this project is to engineer a centralised, governed and scalable data platform that provides a reliable single source of truth for downstream analytics and reporting.
+
+## Solution Architecture
+The platform follows a layered, metadata-driven architecture designed to separate source ingestion, data transformation, business modelling and analytical consumption.
+
+### Architecture Flow
+
+#### Source Systems
+SAP Business One (HANA) • QuickBooks Online • SQL Server ERP • SharePoint • REST API
+
+↓
+
+#### Metadata-Driven Ingestion & Orchestration
+Configuration-driven pipelines • Lookup • ForEach • Conditional processing • Parameterised ingestion
+
+↓
+
+#### Bronze Layer — Raw
+Source-aligned ingestion • Raw historical preservation • Ingestion metadata • Traceability
+
+↓
+
+#### Silver Layer — Validated & Conformed
+Schema enforcement • Data cleansing • Deduplication • Business-rule validation • Standardisation • SCD processing • Incremental Delta MERGE
+
+↓
+
+#### Gold Layer — Business Ready
+Dimensional modelling • Fact tables • Dimensions • Business rules • Curated analytical datasets
+
+↓
+
+#### Semantic & Consumption Layer
+Power BI Semantic Model • Business KPIs • Enterprise dashboards and reporting
+
+### Cross-Cutting Engineering Controls
+
+The architecture is supported by operational controls across the end-to-end data lifecycle:
+
+* Metadata & Configuration Management — controls source onboarding and pipeline behaviour
+* Data Quality & Reconciliation — validates completeness, consistency and business rules
+* Audit Logging — captures pipeline execution, processing status and record-level metrics
+* Error Handling & Recoverability — captures failures and supports controlled reruns
+* Monitoring & Observability — provides visibility into pipeline health and failed processing stages
+* Incremental Processing — reduces unnecessary reprocessing through watermark-driven ingestion and Delta MERGE
