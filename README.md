@@ -73,3 +73,45 @@ The architecture is supported by operational controls across the end-to-end data
 * Error Handling & Recoverability — captures failures and supports controlled reruns
 * Monitoring & Observability — provides visibility into pipeline health and failed processing stages
 * Incremental Processing — reduces unnecessary reprocessing through watermark-driven ingestion and Delta MERGE
+
+## Pipeline Orchestration & Execution
+
+The master orchestration pipeline coordinates the end-to-end execution of the data platform, from source ingestion through transformation, business modelling and semantic model refresh.
+
+The orchestration sequence includes:
+
+- Execution start logging
+- Metadata-driven source discovery
+- Dynamic source-system processing
+- Silver-layer transformation
+- Gold-layer business modelling
+- Power BI semantic model refresh
+- Final execution status logging
+
+The execution below demonstrates a successful end-to-end platform run.
+
+![Master Pipeline End-to-End Execution](master-pipeline-end-to-end-execution.png)
+
+### Dependency-Aware Silver Transformation
+
+Silver-layer processing is orchestrated according to data dependencies. Foundational dimensions are processed before dependent dimensions and fact datasets to support referential integrity and controlled transformation sequencing.
+
+The pipeline coordinates notebook-based transformations across dimensions, transactional facts and downstream datasets.
+
+![Silver Layer Transformation Pipeline](silver-layer-transformation-pipeline.png)
+
+## Incremental Ingestion & Watermark Management
+
+The platform implements metadata-driven incremental ingestion to minimise unnecessary source extraction and support reliable restartable processing.
+
+### Metadata-Driven Incremental Pipeline
+
+The QuickBooks ingestion pipeline retrieves incremental configuration from the metadata control layer, executes the parameterised ingestion notebook, and updates watermark state only after successful processing.
+
+![Metadata-Driven Incremental Pipeline](metadata-driven-incremental-pipeline.png)
+
+### Watermark Resolution Logic
+
+Incremental extraction windows are resolved dynamically for each configured entity. The implementation reads the previous successful watermark, supports initial seeding for new entities, applies a configurable overlap to protect against timestamp boundary conditions, and calculates the effective extraction start time for each run.
+
+![Incremental Watermark Logic](incremental-watermark-logic.png)
