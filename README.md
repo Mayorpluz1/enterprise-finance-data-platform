@@ -131,3 +131,53 @@ Key modelling principles include:
 - Analytics-ready structures for enterprise reporting
 
 ![Enterprise Finance Semantic Model](enterprise-finance-semantic-model.png)
+
+## Analytics & Business Outcomes
+
+The Power BI reporting layer consumes the curated Gold-layer data through the enterprise semantic model, providing a consistent view of financial and operational performance across the organisation.
+
+The reporting solution enables stakeholders to analyse:
+
+- Revenue and profitability performance
+- Budget versus actual performance
+- Customer and product performance
+- Accounts receivable and cash collection
+- Inventory performance
+- Financial position and general ledger reporting
+
+The semantic model centralises business measures and reporting logic, ensuring that dashboards use consistent definitions across business entities.
+
+
+## Analytics & Business Consumption
+
+The curated Gold-layer datasets are exposed through a Power BI semantic model, providing a consistent analytical layer across the three business entities.
+
+The reporting layer supports executive and finance analysis across revenue, gross margin, budget performance, customers, products and financial position.
+
+![Executive Financial Overview](executive-financial-overview.png)
+
+The dashboard demonstrates the final consumption path of the platform:
+
+**Source Systems → Bronze → Silver → Gold → Semantic Model → Power BI**
+
+Rather than embedding business logic independently within individual reports, reusable measures and analytical relationships are maintained through the semantic model to provide consistent reporting across the platform.
+
+## Data Quality & Validation
+
+Data quality controls are integrated into the processing lifecycle to validate data before it is consumed by downstream reporting.
+
+Validation results are captured and exposed through an operational dashboard, providing visibility into passed and failed checks, expected and observed values, and validation timestamps.
+
+![Data Quality and Validation](data-quality-validation.png)
+
+This provides an auditable view of data quality and helps identify issues before unreliable data reaches business reporting.
+
+## Pipeline Monitoring & Observability
+
+Pipeline execution metadata is captured to provide operational visibility across the platform.
+
+The monitoring layer tracks pipeline runs, execution status, processing duration, records written and source-object activity, enabling failed or abnormal processing to be identified and investigated.
+
+![Pipeline Operations and Monitoring](pipeline-operations-monitoring.png)
+
+This closes the operational loop between ingestion, transformation and reporting by making pipeline health and data-processing outcomes visible from a central monitoring view.
