@@ -51,7 +51,7 @@ Source-aligned ingestion • Raw historical preservation • Ingestion metadata 
 ↓
 
 #### Silver Layer — Validated & Conformed
-Schema enforcement • Data cleansing • Deduplication • Business-rule validation • Standardisation • SCD processing • Incremental Delta MERGE
+Schema enforcement • Data cleansing • Deduplication • Business-rule validation • Standardisation • SCD Type 2 where applicable • Incremental Delta MERGE
 
 ↓
 
@@ -115,3 +115,19 @@ The QuickBooks ingestion pipeline retrieves incremental configuration from the m
 Incremental extraction windows are resolved dynamically for each configured entity. The implementation reads the previous successful watermark, supports initial seeding for new entities, applies a configurable overlap to protect against timestamp boundary conditions, and calculates the effective extraction start time for each run.
 
 ![Incremental Watermark Logic](incremental-watermark-logic.png)
+## Gold Layer & Semantic Model
+
+The Gold layer transforms validated and conformed data into business-ready dimensional structures for enterprise finance analytics.
+
+Curated fact and dimension tables are exposed through the Power BI semantic model, where relationships, business measures and analytical structures provide a consistent reporting layer across the organisation.
+
+Key modelling principles include:
+
+- Conformed dimensions across source systems
+- Surrogate keys for dimensional relationships
+- Fact tables defined at explicit business grain
+- Centralised business measures and calculations
+- Controlled relationships between facts and dimensions
+- Analytics-ready structures for enterprise reporting
+
+![Enterprise Finance Semantic Model](enterprise-finance-semantic-model.png)
