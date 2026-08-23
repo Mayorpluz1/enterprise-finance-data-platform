@@ -90,7 +90,7 @@ The orchestration sequence includes:
 
 The execution below demonstrates a successful end-to-end platform run.
 
-![Master Pipeline End-to-End Execution](master-pipeline-end-to-end-execution.png)
+![Master Pipeline End-to-End Execution](images/master-pipeline-end-to-end-execution.png)
 
 ### Dependency-Aware Silver Transformation
 
@@ -98,7 +98,7 @@ Silver-layer processing is orchestrated according to data dependencies. Foundati
 
 The pipeline coordinates notebook-based transformations across dimensions, transactional facts and downstream datasets.
 
-![Silver Layer Transformation Pipeline](silver-layer-transformation-pipeline.png)
+![Silver Layer Transformation Pipeline](images/silver-layer-transformation-pipeline.png)
 
 ## Incremental Ingestion & Watermark Management
 
@@ -108,13 +108,13 @@ The platform implements metadata-driven incremental ingestion to minimise unnece
 
 The QuickBooks ingestion pipeline retrieves incremental configuration from the metadata control layer, executes the parameterised ingestion notebook, and updates watermark state only after successful processing.
 
-![Metadata-Driven Incremental Pipeline](metadata-driven-incremental-pipeline.png)
+![Metadata-Driven Incremental Pipeline](images/metadata-driven-incremental-pipeline.png)
 
 ### Watermark Resolution Logic
 
 Incremental extraction windows are resolved dynamically for each configured entity. The implementation reads the previous successful watermark, supports initial seeding for new entities, applies a configurable overlap to protect against timestamp boundary conditions, and calculates the effective extraction start time for each run.
 
-![Incremental Watermark Logic](incremental-watermark-logic.png)
+![Incremental Watermark Logic](images/incremental-watermark-logic.png)
 ## Gold Layer & Semantic Model
 
 The Gold layer transforms validated and conformed data into business-ready dimensional structures for enterprise finance analytics.
@@ -130,7 +130,7 @@ Key modelling principles include:
 - Controlled relationships between facts and dimensions
 - Analytics-ready structures for enterprise reporting
 
-![Enterprise Finance Semantic Model](enterprise-finance-semantic-model.png)
+![Enterprise Finance Semantic Model](images/enterprise-finance-semantic-model.png)
 
 ## Analytics & Business Outcomes
 
@@ -154,7 +154,7 @@ The curated Gold-layer datasets are exposed through a Power BI semantic model, p
 
 The reporting layer supports executive and finance analysis across revenue, gross margin, budget performance, customers, products and financial position.
 
-![Executive Financial Overview](executive-financial-overview.png)
+![Executive Financial Overview](images/executive-financial-overview.png)
 
 The dashboard demonstrates the final consumption path of the platform:
 
@@ -168,7 +168,7 @@ Data quality controls are integrated into the processing lifecycle to validate d
 
 Validation results are captured and exposed through an operational dashboard, providing visibility into passed and failed checks, expected and observed values, and validation timestamps.
 
-![Data Quality and Validation](data-quality-validation.png)
+![Data Quality and Validation](images/data-quality-validation.png)
 
 This provides an auditable view of data quality and helps identify issues before unreliable data reaches business reporting.
 
@@ -178,7 +178,7 @@ Pipeline execution metadata is captured to provide operational visibility across
 
 The monitoring layer tracks pipeline runs, execution status, processing duration, records written and source-object activity, enabling failed or abnormal processing to be identified and investigated.
 
-![Pipeline Operations and Monitoring](pipeline-operations-monitoring.png)
+![Pipeline Operations and Monitoring](images/pipeline-operations-monitoring.png)
 
 This closes the operational loop between ingestion, transformation and reporting by making pipeline health and data-processing outcomes visible from a central monitoring view.
 
