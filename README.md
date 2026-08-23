@@ -29,7 +29,7 @@ The fragmented architecture creates several challenges:
 
 The objective of this project is to engineer a centralised, governed and scalable data platform that provides a reliable single source of truth for downstream analytics and reporting.
 
-![Enterprise Finance Data Platform Architecture](enterprise-finance-data-platform-architecture.png)
+![Enterprise Finance Data Platform Architecture](images/enterprise-finance-data-platform-architecture.png)
 ## Solution Architecture
 The platform follows a layered, metadata-driven architecture designed to separate source ingestion, data transformation, business modelling and analytical consumption.
 
