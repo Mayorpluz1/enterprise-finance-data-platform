@@ -181,3 +181,75 @@ The monitoring layer tracks pipeline runs, execution status, processing duration
 ![Pipeline Operations and Monitoring](pipeline-operations-monitoring.png)
 
 This closes the operational loop between ingestion, transformation and reporting by making pipeline health and data-processing outcomes visible from a central monitoring view.
+
+## Engineering Design Highlights
+
+The platform was designed around reusable engineering patterns rather than source-specific pipelines.
+
+### Metadata-Driven Processing
+
+Source and entity behaviour is controlled through metadata, allowing ingestion logic to be reused across multiple datasets without duplicating pipeline implementations.
+
+Configuration controls include source and object identification, load behaviour, processing sequence, watermark configuration and active/inactive status.
+
+### Full and Incremental Load Strategy
+
+The ingestion framework supports different load strategies based on source and entity requirements.
+
+Initial loads establish the baseline dataset, while subsequent incremental loads process only new or changed records using stored watermark state.
+
+For incremental processing, the last successful watermark is persisted only after successful completion, preventing failed runs from incorrectly advancing the extraction boundary.
+
+### Idempotency & Recoverability
+
+Incremental processing is designed to support safe reruns.
+
+A configurable watermark overlap protects against late-arriving records and timestamp-boundary conditions, while downstream Delta MERGE processing prevents overlapping extraction windows from creating duplicate business records.
+
+Failed executions do not advance the successful watermark, allowing the next run to restart from the previously committed processing state.
+
+### Dependency-Aware Transformation
+
+Transformation workloads are executed according to dataset dependencies.
+
+Foundational dimensions are processed before dependent dimensions and fact tables, helping maintain referential integrity and predictable transformation sequencing across the Silver and Gold layers.
+
+### Data Quality & Reconciliation
+
+Data quality checks are incorporated into the processing lifecycle rather than treated as a reporting-only activity.
+
+Validation results, expected and observed values, processing status and execution timestamps are captured for operational monitoring and investigation.
+
+### Observability
+
+Pipeline and data-processing metrics are persisted for operational monitoring, including execution status, processing duration, records written, validation results and source-object activity.
+
+These metrics feed the Power BI monitoring layer, providing visibility from pipeline execution through to data quality outcomes.
+
+## Technology Stack
+
+| Area | Technology |
+|---|---|
+| Data Platform | Microsoft Fabric |
+| Storage | OneLake / Lakehouse |
+| Orchestration | Fabric Data Pipelines |
+| Processing | PySpark, Python, SQL |
+| Table Format | Delta Lake |
+| Source Systems | SAP Business One (HANA), QuickBooks Online, SQL Server ERP, SharePoint, REST API |
+| Data Architecture | Medallion Architecture |
+| Data Modelling | Dimensional Modelling, Star Schema |
+| Incremental Processing | Watermark-Based Extraction, Delta MERGE |
+| Analytics | Power BI Semantic Model, Power BI |
+| Monitoring | Audit Logging, Data Quality Metrics, Pipeline Execution Metrics |
+| Version Control | Git / GitHub |
+
+## Key Engineering Outcomes
+
+- Consolidated heterogeneous finance and ERP sources into a common Fabric data platform.
+- Replaced source-specific ingestion patterns with reusable metadata-driven orchestration.
+- Implemented incremental processing with persistent watermark state and controlled restart behaviour.
+- Established Bronze, Silver and Gold processing boundaries for raw preservation, conformance and business modelling.
+- Implemented dependency-aware transformation and Delta MERGE processing.
+- Integrated data quality validation, audit logging and pipeline execution monitoring.
+- Built a dimensional Gold layer and reusable Power BI semantic model for cross-entity reporting.
+- Exposed both business analytics and platform operational health through Power BI.
