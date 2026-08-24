@@ -243,17 +243,6 @@ These metrics feed the Power BI monitoring layer, providing visibility from pipe
 | Monitoring | Audit Logging, Data Quality Metrics, Pipeline Execution Metrics |
 | Version Control | Git / GitHub |
 
-## Key Engineering Outcomes
-
-- Consolidated heterogeneous finance and ERP sources into a common Fabric data platform.
-- Replaced source-specific ingestion patterns with reusable metadata-driven orchestration.
-- Implemented incremental processing with persistent watermark state and controlled restart behaviour.
-- Established Bronze, Silver and Gold processing boundaries for raw preservation, conformance and business modelling.
-- Implemented dependency-aware transformation and Delta MERGE processing.
-- Integrated data quality validation, audit logging and pipeline execution monitoring.
-- Built a dimensional Gold layer and reusable Power BI semantic model for cross-entity reporting.
-- Exposed both business analytics and platform operational health through Power BI.
-
 - ## Repository Structure
 
 ```text
@@ -275,4 +264,14 @@ enterprise-finance-data-platform/
 │
 └── README.md
     └── Architecture, implementation approach and engineering documentation
-```
+
+## Key Engineering Outcomes
+
+- Consolidated heterogeneous finance and ERP sources into a common Fabric data platform.
+- Replaced source-specific ingestion patterns with reusable metadata-driven orchestration.
+- Implemented incremental processing with persistent watermark state and controlled restart behaviour.
+- Established Bronze, Silver and Gold processing boundaries for raw preservation, conformance and business modelling.
+- Implemented dependency-aware transformation and Delta MERGE processing.
+- Integrated data quality validation, audit logging and pipeline execution monitoring.
+- Built a dimensional Gold layer and reusable Power BI semantic model for cross-entity reporting.
+- Exposed both business analytics and platform operational health through Power BI.
