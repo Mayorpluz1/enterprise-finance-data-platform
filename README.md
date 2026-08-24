@@ -253,3 +253,26 @@ These metrics feed the Power BI monitoring layer, providing visibility from pipe
 - Integrated data quality validation, audit logging and pipeline execution monitoring.
 - Built a dimensional Gold layer and reusable Power BI semantic model for cross-entity reporting.
 - Exposed both business analytics and platform operational health through Power BI.
+
+- ## Repository Structure
+
+```text
+enterprise-finance-data-platform/
+├── images/
+│   └── Architecture, pipeline, semantic model and monitoring screenshots
+│
+├── notebooks/
+│   ├── 01_qbo_incremental_ingestion.ipynb
+│   │   └── Metadata-driven incremental QuickBooks ingestion with watermark management
+│   ├── 02_silver_customer_scd2.ipynb
+│   │   └── Silver-layer customer transformation and SCD Type 2 processing
+│   └── 03_gold_business_model.ipynb
+│       └── Gold-layer dimensional modelling and business-ready dataset generation
+│
+├── sql/
+│   └── 01_control_tables.sql
+│       └── Metadata configuration, watermark tracking and audit/control table definitions
+│
+└── README.md
+    └── Architecture, implementation approach and engineering documentation
+```
