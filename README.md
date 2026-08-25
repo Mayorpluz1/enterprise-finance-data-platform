@@ -6,13 +6,36 @@ End-to-end metadata-driven data platform integrating heterogeneous finance and E
 
 ---
 
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Business Problem](#business-problem)
+- [Business Requirements](#business-requirements)
+- [Solution Architecture](#solution-architecture)
+- [Pipeline Orchestration & Execution](#pipeline-orchestration--execution)
+- [Incremental Ingestion & Watermark Management](#incremental-ingestion--watermark-management)
+- [Gold Layer & Semantic Model](#gold-layer--semantic-model)
+- [Analytics & Business Consumption](#analytics--business-consumption)
+- [Data Quality & Validation](#data-quality--validation)
+- [Pipeline Monitoring & Observability](#pipeline-monitoring--observability)
+- [Engineering Design Highlights](#engineering-design-highlights)
+- [Technology Stack](#technology-stack)
+- [Repository Structure](#repository-structure)
+- [Key Engineering Outcomes](#key-engineering-outcomes)
+- [Implementation Evidence](#implementation-evidence)
+- [Design Principles](#design-principles)
+- [End-to-End Platform Flow](#end-to-end-platform-flow)
+- [Project Summary](#project-summary)
+
+---
+
 ## Project Overview
 
-This project demonstrates the design and implementation of a production-oriented enterprise data platform built on Microsoft Fabric to consolidate fragmented financial and operational data from multiple business entities and source systems.
+This project demonstrates the design and implementation of a production-oriented enterprise data platform built on Microsoft Fabric to consolidate fragmented financial and operational data from multiple business entities and heterogeneous source systems.
 
-The platform implements a metadata-driven ingestion framework, Medallion Architecture (Bronze, Silver and Gold), incremental data processing, data quality validation, audit logging, error handling, orchestration, dimensional modelling and semantic reporting.
+The platform implements a metadata-driven ingestion framework, Medallion Architecture (Bronze, Silver and Gold), configurable full and incremental processing, data quality validation, audit logging, error handling, orchestration, dimensional modelling and semantic reporting.
 
-The solution is designed around real-world Data Engineering principles including scalability, maintainability, observability, recoverability and data reliability.
+The solution is designed around real-world Data Engineering principles including scalability, maintainability, observability, recoverability, idempotency and data reliability.
 
 ---
 
@@ -29,8 +52,74 @@ The fragmented architecture creates several challenges:
 - Repeated ingestion and transformation logic
 - Difficulty tracing data from source systems to reporting
 - Limited scalability when onboarding additional datasets
+- Inconsistent processing approaches across heterogeneous source systems
+- Limited operational visibility into data quality and pipeline performance
 
-The objective of this project is to engineer a centralised, governed and scalable data platform that provides a reliable single source of truth for downstream analytics and reporting.
+The objective of this project is to engineer a centralised, governed and scalable data platform that provides a reliable single source of truth for downstream analytics and enterprise reporting.
+
+---
+
+## Business Requirements
+
+The platform was designed to satisfy the following core business and engineering requirements:
+
+### BR-01 — Centralised Data Platform
+
+Consolidate financial and operational data from multiple business entities and heterogeneous source systems into a common Microsoft Fabric data platform.
+
+### BR-02 — Multi-Source Integration
+
+Support ingestion from different source technologies, including:
+
+- SAP Business One (HANA)
+- QuickBooks Online
+- SQL Server ERP
+- SharePoint and file-based sources
+- External REST APIs
+
+### BR-03 — Reusable Ingestion Framework
+
+Reduce duplicated source-specific pipeline development by using metadata and configuration to control ingestion behaviour, source objects, target destinations, load strategies and execution sequencing.
+
+### BR-04 — Full and Incremental Processing
+
+Support both initial full loads and subsequent incremental processing based on source and entity requirements.
+
+Where incremental processing is applicable, the platform must maintain persistent watermark state and process only new or changed records.
+
+### BR-05 — Historical Data Preservation
+
+Preserve source-aligned raw data in the Bronze layer to support traceability, investigation, replay and historical auditing.
+
+### BR-06 — Data Quality & Reconciliation
+
+Validate completeness, consistency and business rules before data is exposed for analytical consumption.
+
+### BR-07 — Standardised Enterprise Data
+
+Transform heterogeneous source structures into validated and conformed Silver-layer datasets with consistent schemas, data types and business definitions.
+
+### BR-08 — Business-Ready Data Model
+
+Provide curated Gold-layer dimensions and fact tables designed around explicit business grain and reusable analytical requirements.
+
+### BR-09 — Consistent Enterprise Reporting
+
+Expose curated data through a reusable Power BI semantic model to provide consistent KPIs, relationships and business calculations across reports.
+
+### BR-10 — Operational Monitoring & Auditability
+
+Capture pipeline execution status, processing duration, record counts, validation outcomes and failure information to support operational monitoring and investigation.
+
+### BR-11 — Failure Recovery & Safe Reruns
+
+Ensure failed processing does not incorrectly advance successful processing state and that pipelines can be rerun without creating duplicate business records.
+
+### BR-12 — Scalability & Maintainability
+
+Allow additional source objects and datasets to be onboarded primarily through configuration rather than duplicating orchestration logic.
+
+---
 
 ![Enterprise Finance Data Platform Architecture](images/enterprise-finance-data-platform-architecture.png)
 
@@ -81,6 +170,7 @@ Power BI Semantic Model • Business KPIs • Enterprise dashboards and reportin
 The architecture is supported by operational controls across the end-to-end data lifecycle:
 
 - **Metadata & Configuration Management** — controls source onboarding and pipeline behaviour
+- **Watermark & Processing State Management** — maintains successful incremental processing boundaries
 - **Data Quality & Reconciliation** — validates completeness, consistency and business rules
 - **Audit Logging** — captures pipeline execution, processing status and record-level metrics
 - **Error Handling & Recoverability** — captures failures and supports controlled reruns
@@ -95,13 +185,15 @@ The master orchestration pipeline coordinates the end-to-end execution of the da
 
 The orchestration sequence includes:
 
-- Execution start logging
-- Metadata-driven source discovery
-- Dynamic source-system processing
-- Silver-layer transformation
-- Gold-layer business modelling
-- Power BI semantic model refresh
-- Final execution status logging
+1. Execution start logging
+2. Metadata-driven source discovery
+3. Dynamic source-system and source-object processing
+4. Bronze ingestion
+5. Dependency-aware Silver transformation
+6. Gold-layer business modelling
+7. Data quality and reconciliation controls
+8. Power BI semantic model refresh
+9. Final execution status logging
 
 The execution below demonstrates a successful end-to-end platform run.
 
@@ -109,7 +201,9 @@ The execution below demonstrates a successful end-to-end platform run.
 
 ### Dependency-Aware Silver Transformation
 
-Silver-layer processing is orchestrated according to data dependencies. Foundational dimensions are processed before dependent dimensions and fact datasets to support referential integrity and controlled transformation sequencing.
+Silver-layer processing is orchestrated according to dataset dependencies.
+
+Foundational dimensions are processed before dependent dimensions and fact datasets to support referential integrity and controlled transformation sequencing.
 
 The pipeline coordinates notebook-based transformations across dimensions, transactional facts and downstream datasets.
 
@@ -119,29 +213,57 @@ The pipeline coordinates notebook-based transformations across dimensions, trans
 
 ## Incremental Ingestion & Watermark Management
 
-The platform implements metadata-driven incremental ingestion to minimise unnecessary source extraction and support reliable, restartable processing.
+The platform implements a reusable metadata-driven incremental ingestion strategy for source objects where incremental extraction is supported.
+
+Rather than hard-coding incremental behaviour for a single source, processing behaviour is controlled through metadata. Configuration determines characteristics such as the source object, load strategy, watermark column, processing sequence and target destination.
+
+This allows the same orchestration pattern to support multiple configured datasets while retaining source-specific extraction logic where required.
 
 ### Metadata-Driven Incremental Pipeline
 
-The QuickBooks ingestion pipeline retrieves incremental configuration from the metadata control layer, executes the parameterised ingestion notebook, and updates watermark state only after successful processing.
+For an incremental execution, the processing framework:
+
+1. Retrieves the configured source and entity metadata
+2. Determines the required load strategy
+3. Reads the last successfully committed watermark
+4. Resolves the effective extraction window
+5. Executes the appropriate parameterised ingestion process
+6. Writes source-aligned data into the Bronze layer
+7. Records execution and processing metrics
+8. Advances the successful watermark only after successful processing
+
+The pipeline shown below demonstrates this metadata-driven incremental processing pattern.
 
 ![Metadata-Driven Incremental Pipeline](images/metadata-driven-incremental-pipeline.png)
 
 ### Watermark Resolution Logic
 
-Incremental extraction windows are resolved dynamically for each configured entity.
+Incremental extraction windows are resolved dynamically for each configured entity where watermark-based processing is applicable.
 
 The implementation:
 
 - Reads the previous successful watermark
 - Supports initial seeding for newly onboarded entities
-- Applies a configurable overlap to protect against late-arriving records and timestamp-boundary conditions
+- Applies a configurable overlap where required to protect against late-arriving records and timestamp-boundary conditions
 - Calculates the effective extraction start time for each run
-- Advances the successful watermark only after successful processing
+- Maintains the extraction boundary independently from failed processing attempts
+- Advances the successful watermark only after successful completion
 
 ![Incremental Watermark Logic](images/incremental-watermark-logic.png)
 
 This design prevents failed executions from incorrectly advancing the extraction boundary and allows subsequent runs to restart from the previously committed processing state.
+
+### Source-Specific Implementation
+
+The repository includes QuickBooks Online as a concrete implementation example of the wider incremental ingestion framework.
+
+The notebook:
+
+`notebooks/01_qbo_incremental_ingestion.ipynb`
+
+demonstrates how the generic metadata and watermark strategy is applied to a specific REST API source.
+
+The architectural pattern itself is not limited to QuickBooks; incremental behaviour is configured according to the capabilities and requirements of each applicable source object.
 
 ---
 
@@ -203,6 +325,8 @@ Validation results are captured and exposed through an operational dashboard, pr
 
 This provides an auditable view of data quality and helps identify issues before unreliable data reaches business reporting.
 
+Data quality is therefore treated as an engineering control within the platform rather than only as a reporting activity.
+
 ---
 
 ## Pipeline Monitoring & Observability
@@ -216,7 +340,9 @@ The monitoring layer tracks:
 - Processing duration
 - Records written
 - Source-system and source-object activity
-- Failed executions and error details
+- Failed executions
+- Error details
+- Data quality outcomes
 
 ![Pipeline Operations and Monitoring](images/pipeline-operations-monitoring.png)
 
@@ -248,15 +374,25 @@ This allows new source objects to be onboarded primarily through configuration r
 
 The ingestion framework supports different load strategies based on source and entity requirements.
 
-Initial loads establish the baseline dataset, while subsequent incremental loads process only new or changed records using stored watermark state.
+Initial loads establish the baseline dataset.
 
-For incremental processing, the last successful watermark is persisted only after successful completion, preventing failed runs from incorrectly advancing the extraction boundary.
+For entities configured for incremental processing, subsequent executions process only new or changed records based on persisted processing state.
+
+This separates the **load strategy** from the pipeline implementation and allows ingestion behaviour to be controlled through metadata.
+
+### Watermark State Management
+
+Watermark state represents the last successfully committed extraction boundary for an incremental entity.
+
+The framework reads this state before processing and advances it only after successful completion.
+
+This ensures a failed execution cannot incorrectly move the starting position of the next incremental run.
 
 ### Idempotency & Recoverability
 
 Incremental processing is designed to support safe reruns.
 
-A configurable watermark overlap protects against late-arriving records and timestamp-boundary conditions, while downstream Delta MERGE processing prevents overlapping extraction windows from creating duplicate business records.
+A configurable watermark overlap can protect against late-arriving records and timestamp-boundary conditions, while downstream Delta MERGE processing prevents overlapping extraction windows from creating duplicate business records.
 
 Failed executions do not advance the successful watermark, allowing the next run to restart from the previously committed processing state.
 
@@ -265,6 +401,12 @@ Failed executions do not advance the successful watermark, allowing the next run
 Transformation workloads are executed according to dataset dependencies.
 
 Foundational dimensions are processed before dependent dimensions and fact tables, helping maintain referential integrity and predictable transformation sequencing across the Silver and Gold layers.
+
+### Slowly Changing Dimensions
+
+Where historical dimensional changes need to be preserved, SCD Type 2 processing maintains historical versions of business entities rather than overwriting previous attribute values.
+
+This provides point-in-time analytical capability while retaining a current version of each dimensional record.
 
 ### Data Quality & Reconciliation
 
@@ -292,7 +434,7 @@ These metrics feed the Power BI monitoring layer, providing visibility from pipe
 | Source Systems | SAP Business One (HANA), QuickBooks Online, SQL Server ERP, SharePoint, REST API |
 | Data Architecture | Medallion Architecture |
 | Data Modelling | Dimensional Modelling, Star Schema |
-| Incremental Processing | Watermark-Based Extraction, Delta MERGE |
+| Incremental Processing | Metadata-Driven Watermark-Based Extraction, Delta MERGE |
 | Analytics | Power BI Semantic Model, Power BI |
 | Monitoring | Audit Logging, Data Quality Metrics, Pipeline Execution Metrics |
 | Version Control | Git / GitHub |
@@ -317,7 +459,7 @@ enterprise-finance-data-platform/
 │
 ├── notebooks/
 │   ├── 01_qbo_incremental_ingestion.ipynb
-│   │   └── Metadata-driven incremental QuickBooks ingestion with watermark management
+│   │   └── QuickBooks implementation of metadata-driven incremental ingestion and watermark management
 │   │
 │   ├── 02_silver_customer_scd2.ipynb
 │   │   └── Silver-layer customer transformation and SCD Type 2 processing
@@ -340,9 +482,10 @@ enterprise-finance-data-platform/
 The implementation demonstrates the following Data Engineering capabilities:
 
 - Consolidated heterogeneous finance and ERP sources into a common Microsoft Fabric data platform.
-- Replaced source-specific ingestion patterns with reusable metadata-driven orchestration.
+- Replaced repeated source-specific orchestration patterns with reusable metadata-driven processing.
 - Implemented parameterised ingestion across multiple source objects.
-- Implemented incremental processing with persistent watermark state and controlled restart behaviour.
+- Implemented configurable full and incremental processing strategies.
+- Implemented persistent watermark state and controlled restart behaviour for incremental entities.
 - Established Bronze, Silver and Gold processing boundaries for raw preservation, conformance and business modelling.
 - Implemented SCD Type 2 processing where historical dimensional changes need to be preserved.
 - Implemented dependency-aware transformation and Delta MERGE processing.
@@ -365,11 +508,24 @@ The repository contains selected implementation artefacts from the platform rath
 
 Contains the control and operational metadata structures used by the platform, including configuration, watermark tracking and audit-related definitions.
 
+The control layer demonstrates how ingestion behaviour is externalised from pipeline logic and managed through configuration.
+
 ### Incremental Ingestion
 
 `notebooks/01_qbo_incremental_ingestion.ipynb`
 
-Demonstrates metadata-driven QuickBooks incremental ingestion, watermark resolution and restartable processing.
+Provides a concrete QuickBooks Online implementation of the wider metadata-driven incremental ingestion strategy.
+
+The notebook demonstrates:
+
+- Configuration-driven processing
+- Watermark resolution
+- Incremental extraction
+- Controlled extraction windows
+- Restartable processing
+- Successful-state advancement
+
+QuickBooks is used as the implementation example; the overall ingestion architecture is designed so equivalent processing behaviour can be configured for other applicable source objects.
 
 ### Silver Transformation & SCD Type 2
 
@@ -385,7 +541,7 @@ Demonstrates Gold-layer dimensional modelling and generation of business-ready a
 
 Together, these artefacts provide implementation evidence across the major platform layers:
 
-**Control Plane → Ingestion → Silver Transformation → Gold Modelling → Semantic Consumption**
+**Control Plane → Ingestion → Bronze → Silver Transformation → Gold Modelling → Semantic Consumption**
 
 ---
 
@@ -394,7 +550,7 @@ Together, these artefacts provide implementation evidence across the major platf
 The platform was developed around several core engineering principles:
 
 **Configuration over duplication**  
-Reusable pipelines are driven by metadata rather than creating independent implementations for every source object.
+Reusable processing is driven by metadata rather than creating independent orchestration implementations for every source object.
 
 **Raw data preservation**  
 Bronze retains source-aligned data to support traceability, replay and investigation.
@@ -403,7 +559,7 @@ Bronze retains source-aligned data to support traceability, replay and investiga
 Bronze, Silver and Gold layers have clearly defined responsibilities for ingestion, conformance and business modelling.
 
 **Incremental by design**  
-Watermark-based extraction reduces unnecessary processing while maintaining persistent state between executions.
+Where supported by the source, watermark-based extraction reduces unnecessary processing while maintaining persistent state between executions.
 
 **Failure-safe state management**  
 Successful watermark state is advanced only after successful processing.
@@ -423,6 +579,9 @@ Pipeline execution and data-processing metrics are captured to support monitorin
 **Centralised business logic**  
 Curated Gold models and the Power BI semantic layer provide reusable business definitions across downstream reporting.
 
+**Scalability through metadata**  
+New datasets can be onboarded primarily through configuration, reducing pipeline duplication and improving maintainability as the platform grows.
+
 ---
 
 ## End-to-End Platform Flow
@@ -435,6 +594,9 @@ Metadata & Configuration
       │
       ▼
 Fabric Data Pipelines
+      │
+      ▼
+Full / Incremental Load Resolution
       │
       ▼
 Bronze Layer
@@ -458,7 +620,7 @@ Power BI Semantic Model
 Executive & Operational Reporting
 ```
 
-Across the processing lifecycle, watermark management, audit logging, error handling, data quality controls and monitoring provide the operational framework required for reliable and recoverable data processing.
+Across the processing lifecycle, metadata configuration, watermark management, audit logging, error handling, data quality controls and monitoring provide the operational framework required for reliable and recoverable data processing.
 
 ---
 
@@ -466,6 +628,8 @@ Across the processing lifecycle, watermark management, audit logging, error hand
 
 This project demonstrates the engineering of a multi-source enterprise data platform rather than an isolated ETL pipeline.
 
-The solution combines ingestion, metadata-driven orchestration, incremental processing, Medallion Architecture, data quality, dimensional modelling, semantic modelling and operational monitoring within Microsoft Fabric.
+The solution combines heterogeneous source integration, metadata-driven orchestration, configurable full and incremental ingestion, persistent watermark management, Medallion Architecture, Delta processing, SCD Type 2, data quality, dimensional modelling, semantic modelling and operational monitoring within Microsoft Fabric.
 
-The resulting architecture provides a scalable foundation for integrating heterogeneous finance and ERP systems while maintaining traceability, recoverability, data reliability and consistent analytical definitions across the organisation.
+The architecture separates reusable orchestration and control logic from source-specific implementation details, allowing the platform to support different source technologies while maintaining consistent engineering standards.
+
+The resulting platform provides a scalable foundation for enterprise finance analytics while maintaining traceability, recoverability, data reliability, operational visibility and consistent analytical definitions across the organisation.
