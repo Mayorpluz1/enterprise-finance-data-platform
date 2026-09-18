@@ -1,6 +1,6 @@
 # Enterprise Finance Data Platform
 
-**Production-Grade Multi-Source Data Engineering Solution on Microsoft Fabric**
+**Production-Oriented Multi-Source Data Engineering Solution on Microsoft Fabric**
 
 End-to-end metadata-driven data platform integrating heterogeneous finance and ERP systems into a governed Lakehouse architecture for trusted analytics and enterprise reporting.
 
